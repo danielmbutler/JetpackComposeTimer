@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -27,7 +29,7 @@ import androidx.navigation.Navigation
 import com.example.JetpackTimer.R
 
 
-class ListFragment : Fragment() {
+class MainFragment : Fragment() {
 
 
     private var TAG = "Launch Activity"
@@ -38,6 +40,7 @@ class ListFragment : Fragment() {
 
     }
 
+    @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,35 +63,70 @@ class ListFragment : Fragment() {
 
 
 
+    @ExperimentalAnimationApi
     @Composable
     fun initContent(){
 
         var progress by remember { mutableStateOf(1f) }
         var setview: String by remember{ mutableStateOf("Choose Timer Duration") }
-        var TimerRunning: Boolean by remember{ mutableStateOf(false)}
+        var timerRunning: Boolean by remember{ mutableStateOf(false)}
+        var LaunchTimer: CountDownTimer? = null
+        var displayStopButton: Boolean by remember{ mutableStateOf(false)}
 
 
-        fun setupTimer(TimerDuration: Long){
-            TimerRunning = true
-            val LaunchTimer = object : CountDownTimer(TimerDuration, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
+        @Composable
+        fun StopButton(){
 
-                    progress -= 1000/TimerDuration.toFloat()
-
-                    setview = "CountDown: ${millisUntilFinished / 1000}"
-
-                    Log.d(TAG, "Minus Value ${1000/TimerDuration.toFloat()}")
-                }
-
-                override fun onFinish() {
-                    Log.d(TAG, "LAUNCH")
+            OutlinedButton(
+                onClick = {
+                    timerRunning = false
                     progress = 0f
                     setview = "Timer Finished"
-                    TimerRunning = false
+                    displayStopButton = false
+
+                          },modifier = Modifier.padding(12.dp)
+            ) {
+                Text(text = "Stop Timer")
+
+            }
+
+        }
+
+        fun setupTimer(TimerDuration: Long){
+
+            if(!timerRunning){
+                val LaunchTimer = object : CountDownTimer(TimerDuration, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+
+                        if(!timerRunning){
+                            this.cancel()
+                        } else {
+                            progress -= 1000/TimerDuration.toFloat()
+
+                            setview = "CountDown: ${millisUntilFinished / 1000}"
+
+
+                            Log.d(TAG, "Minus Value ${1000/TimerDuration.toFloat()} TimerValue: $timerRunning")
+                        }
+
+                    }
+
+                    override fun onFinish() {
+                        Log.d(TAG, "LAUNCH")
+                        progress = 0f
+                        setview = "Timer Finished"
+                        timerRunning = false
+
+                    }
 
                 }
+                timerRunning = true
+                displayStopButton = true
+                LaunchTimer.start()
+            }
 
-            }.start()
+
+
         }
 
 
@@ -117,40 +155,39 @@ class ListFragment : Fragment() {
                     )
                     Spacer(Modifier.requiredHeight(50.dp))
                     OutlinedButton(
-                            onClick = {
-                                if(!TimerRunning){
-                                    setupTimer(10000)
-                                }
-                            }, modifier = Modifier.padding(12.dp)
+                        onClick = { setupTimer(10000) }, modifier = Modifier.padding(12.dp)
                     ) {
                         Text(text = "10 Seconds")
 
                     }
                     OutlinedButton(
                         onClick = {
-                            if(!TimerRunning){
-                                setupTimer(30000)
-                            }
-                        },modifier = Modifier.padding(12.dp)
+                            setupTimer(30000) },modifier = Modifier.padding(12.dp)
                     ) {
                         Text(text = "30 Seconds")
 
                     }
                     OutlinedButton(
-                        onClick = {
-                            if(!TimerRunning){
-                                setupTimer(60000)
-                            }
-                        },modifier = Modifier.padding(12.dp)
+                        onClick = { setupTimer(60000) },modifier = Modifier.padding(12.dp)
                     ) {
                         Text(text = "1 minute")
 
                     }
+
+
+                    AnimatedVisibility(visible = displayStopButton){
+                        StopButton()
+                    }
+
                 }
             }
         }
+
+
     }
 }
+
+
 
 
 

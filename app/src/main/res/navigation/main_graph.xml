@@ -6,14 +6,8 @@
 
     <fragment
         android:id="@+id/listfragment"
-        android:name="com.example.adoptapup.ui.fragments.ListFragment"
+        android:name="com.example.JetpackTimer.ui.fragments.MainFragment"
         android:label="ListFragment" >
-        <action
-            android:id="@+id/viewDog"
-            app:destination="@id/DetailFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/DetailFragment"
-        android:name="com.example.adoptapup.ui.fragments.DetailFragment"
-        android:label="DetailFragment" />
+
 </navigation>

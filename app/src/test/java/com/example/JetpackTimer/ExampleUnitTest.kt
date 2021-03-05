@@ -1,4 +1,4 @@
-package com.example.adoptapup
+package com.example.JetpackTimer
 
 import org.junit.Test
 
